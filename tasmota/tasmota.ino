@@ -748,6 +748,9 @@ void Scheduler(void) {
 
   static uint32_t state_second = 0;                // State second timer
   if (TimeReached(state_second)) {
+#ifdef FIRMWARE_BLYNK 
+    BlynkSend();
+#endif
     SetNextTimeInterval(state_second, 1000);
     PerformEverySecond();
     XdrvXsnsCall(FUNC_EVERY_SECOND);
@@ -766,6 +769,9 @@ void Scheduler(void) {
 void loop(void) {
   uint32_t my_sleep = millis();
 
+#ifdef FIRMWARE_BLYNK 
+  BlynkRun();
+#endif
   Scheduler();
 
   uint32_t my_activity = millis() - my_sleep;

@@ -21,7 +21,7 @@ const char kTasmotaCommands[] PROGMEM = "|"  // No prefix
   // SetOptions synonyms
   D_SO_WIFINOSLEEP "|"
   // Other commands
-  D_CMND_UPGRADE "|" D_CMND_UPLOAD "|" D_CMND_OTAURL "|" D_CMND_SERIALLOG "|" D_CMND_RESTART "|"
+  D_CMND_BLYNKPORT "|" D_CMND_UPGRADE "|" D_CMND_UPLOAD "|" D_CMND_OTAURL "|" D_CMND_SERIALLOG "|" D_CMND_RESTART "|"
 #ifndef FIRMWARE_MINIMAL_ONLY
   D_CMND_BACKLOG "|" D_CMND_DELAY "|" D_CMND_POWER "|" D_CMND_STATUS "|" D_CMND_STATE "|" D_CMND_SLEEP "|"
   D_CMND_POWERONSTATE "|" D_CMND_PULSETIME "|" D_CMND_BLINKTIME "|" D_CMND_BLINKCOUNT "|" D_CMND_SAVEDATA "|"
@@ -60,7 +60,7 @@ SO_SYNONYMS(kTasmotaSynonyms,
 );
 
 void (* const TasmotaCommand[])(void) PROGMEM = {
-  &CmndUpgrade, &CmndUpgrade, &CmndOtaUrl, &CmndSeriallog, &CmndRestart,
+  &CmndBlynkPort, &CmndUpgrade, &CmndUpgrade, &CmndOtaUrl, &CmndSeriallog, &CmndRestart,
 #ifndef FIRMWARE_MINIMAL_ONLY
   &CmndBacklog, &CmndDelay, &CmndPower, &CmndStatus, &CmndState, &CmndSleep,
   &CmndPowerOnState, &CmndPulsetime, &CmndBlinktime, &CmndBlinkcount, &CmndSavedata,
@@ -1047,6 +1047,13 @@ void CmndSleep(void)
   }
   Response_P(S_JSON_COMMAND_NVALUE_ACTIVE_NVALUE, XdrvMailbox.command, Settings->sleep, TasmotaGlobal.sleep);
 
+}
+
+void CmndBlynkPort(void) {
+  if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 129)) {
+    Settings->mqtt_port = XdrvMailbox.payload;
+  }
+  ResponseCmndNumber(Settings->mqtt_port);
 }
 
 void CmndUpgrade(void)

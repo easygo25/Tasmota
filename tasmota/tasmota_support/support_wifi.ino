@@ -41,6 +41,20 @@ const uint8_t WIFI_CHECK_SEC = 20;         // seconds
 const uint8_t WIFI_RETRY_OFFSET_SEC = WIFI_RETRY_SECONDS;  // seconds
 
 #include <ESP8266WiFi.h>                   // Wifi, MQTT, Ota, WifiManager
+#include "lwip/dns.h"
+
+#ifdef FIRMWARE_BLYNK 
+  #ifdef FIRMWARE_SASCHA
+    #define BLYNK_TEMPLATE_ID "TMPLEuzaKRR8"
+    #define BLYNK_DEVICE_NAME "Heizung"
+    #define BLYNK_AUTH_TOKEN "uVRot6ERpNV2jl45OiSstCqaIrSZsKUl"
+  #elif FIRMWARE_PETER
+    #define BLYNK_TEMPLATE_ID "TMPL6zUIuQAZ"
+    #define BLYNK_TEMPLATE_NAME "ESP32Test"
+    #define BLYNK_AUTH_TOKEN "033o-Pa6Ml_7kAvmpuJHOaLqHLJnc_ZI"
+  #endif
+    #include <BlynkSimpleEsp8266.h>
+#endif
 
 int WifiGetRssiAsQuality(int rssi) {
   int quality = 0;
@@ -263,6 +277,15 @@ void WifiBegin(uint8_t flag, uint8_t channel) {
   if (Settings->flag5.wait_for_wifi_result) {  // SetOption142 - (Wifi) Wait 1 second for wifi connection solving some FRITZ!Box modem issues (1)
     WiFi.waitForConnectResult(1000);  // https://github.com/arendst/Tasmota/issues/14985
   }
+
+#ifdef FIRMWARE_BLYNK 
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "Connect Blynk"));
+  Blynk.config(BLYNK_AUTH_TOKEN);
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "..."));
+  while (!Blynk.connect()) {
+  }
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "Connected Blynk"));
+#endif
 }
 
 void WifiBeginAfterScan(void)
@@ -731,6 +754,22 @@ RF_PRE_INIT()
   rf_pre_init_flag = true;
 }
 #endif  // WIFI_RF_PRE_INIT
+
+#ifdef FIRMWARE_BLYNK 
+void BlynkRun(){
+    Blynk.run();
+}
+
+void BlynkSend(){
+  //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "virtualWrite"));
+  //Blynk.virtualWrite(V6, millis());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "Blynk: virtualWrite(%d)"), Settings->mqtt_port);
+  if (Settings->mqtt_port <= 128){
+    Blynk.virtualWrite(Settings->mqtt_port, Settings->weight_user_tare);
+  }
+  //Blynk.virtualWrite(Settings->mqtt_port, Settings->weight_user_tare);
+}
+#endif
 
 void WifiEnable(void) {
   Wifi.counter = 1;

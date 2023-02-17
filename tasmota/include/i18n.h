@@ -308,6 +308,7 @@
 #define D_CMND_SWITCHTEXT "SwitchText"
 #define D_CMND_SLEEP "Sleep"
 #define D_CMND_UPLOAD "Upload"
+#define D_CMND_BLYNKPORT "BlynkPort"
 #define D_CMND_UPGRADE "Upgrade"
   #define D_JSON_ONE_OR_GT "1 or >%s to upgrade"
 #define D_CMND_OTAURL "OtaUrl"
